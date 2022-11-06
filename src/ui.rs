@@ -1,27 +1,73 @@
 //! UI-specific submodule for Battle Line, i.e. with colors and I/O.
 
-use ansi_term::{ANSIString, Color, Style};
-use rsbl::{Card, TroopColor};
+use ansi_term::Color;
+use rsbl::{Card, Field, Flag, TroopColor};
+use std::fmt::Display;
 
-/// Returns a card as a formatted ANSI string (i.e. for terminal output).
-pub fn format_card<'a>(card: Card) -> ANSIString<'a> {
+use crate::display::{Buffer, Cell};
+
+fn draw_card(card: &Card) -> Cell {
+    let mut cell = Cell::new();
     if let Card::Troop(value, color) = card {
-        let color = match color {
+        cell.bg(match color {
             TroopColor::Red => Color::Red,
             TroopColor::Green => Color::Green,
             TroopColor::Blue => Color::Blue,
             TroopColor::Yellow => Color::Yellow,
             TroopColor::Orange => Color::RGB(255, 87, 51),
             TroopColor::Purple => Color::Purple,
-        };
-        let style = Style::new().on(color).bold();
-        let value = if value.value() == 10 {
-            0
-        } else {
-            value.value()
-        };
-        return style.paint(format!(" {} ", value));
+        });
+        cell.render(format!(
+            "{}",
+            if value.value() == 10 {
+                0
+            } else {
+                value.value()
+            }
+        ));
     } else {
         todo!("Not yet implemented: {:?}", card);
     }
+    return cell;
+}
+
+fn draw_flag(flag: &Flag) -> Cell {
+    let mut cell = Cell::new();
+    if let Flag::Claimed = flag {
+        todo!("Use ⬆ or ⬇ based on who claimed");
+    } else {
+        cell.render(String::from("⚑"));
+        cell.fg(Color::Red);
+    }
+    cell
+}
+
+/// Returns a [`Display`]-able buffer representing output from the `field`.
+pub fn draw_field(field: Field) -> impl Display {
+    assert_eq!(field.columns().len(), 7);
+
+    let mut buffer = Buffer::new(7 * 4, 9);
+
+    for c in 0..7 {
+        let column = &field.columns()[c];
+
+        // Draw flag.
+        buffer.set(c * 4, 5, draw_flag(column.flag()));
+
+        // Draw north set of cards for this column.
+        let mut i = 4;
+        for card in column.formations()[0].cards().iter() {
+            buffer.set(c * 4, i, draw_card(card));
+            i -= 1;
+        }
+
+        // Draw south set of cards for this column.
+        let mut i = 6;
+        for card in column.formations()[1].cards().iter() {
+            buffer.set(c * 4, i, draw_card(card));
+            i += 1;
+        }
+    }
+
+    return buffer;
 }

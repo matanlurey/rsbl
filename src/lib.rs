@@ -1,3 +1,83 @@
+//! Game logic and data structures.
+
+/// The field of cards, i.e. seven flags with cards being played at each.
+pub struct Field {
+    columns: Vec<Column>,
+}
+
+impl Field {
+    pub fn new() -> Field {
+        let mut columns: Vec<Column> = Vec::with_capacity(7);
+
+        for _ in 0..7 {
+            columns.push(Column {
+                flag: Flag::Unclaimed,
+                formations: [Formation::new(), Formation::new()],
+            })
+        }
+
+        Field { columns }
+    }
+
+    pub fn columns(&self) -> &Vec<Column> {
+        &self.columns
+    }
+
+    pub fn add_card(&mut self, column: usize, side: Side, troop: Card) {
+        let column = &mut self.columns[column];
+        let formation = if let Side::North = side {
+            &mut column.formations[0]
+        } else {
+            &mut column.formations[1]
+        };
+        formation.0.push(troop);
+    }
+}
+
+/// Which player, the north or south player.
+pub enum Side {
+    North,
+    South,
+}
+
+/// A column of cards, i.e. a flag with cards being played for each player.
+pub struct Column {
+    /// Flag state for a given column.
+    flag: Flag,
+
+    /// Formations of cards belonging to either player.
+    formations: [Formation; 2],
+}
+
+impl Column {
+    pub fn flag(&self) -> &Flag {
+        &self.flag
+    }
+
+    pub fn formations(&self) -> &[Formation; 2] {
+        &self.formations
+    }
+}
+
+/// Possible states for a flag in a [`Column`].
+pub enum Flag {
+    Unclaimed,
+    Claimed,
+}
+
+/// Possible cards in a formation for a player.
+pub struct Formation(Vec<Card>);
+
+impl Formation {
+    pub fn new() -> Formation {
+        Formation(Vec::with_capacity(4))
+    }
+
+    pub fn cards(&self) -> &Vec<Card> {
+        &self.0
+    }
+}
+
 /// Possible cards.
 #[derive(Debug, PartialEq)]
 pub enum Card {

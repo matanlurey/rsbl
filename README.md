@@ -8,19 +8,15 @@ A Rust implementation of the game [Battle Line][].
 
 Currently there is only the simplest prototype of the game:
 
-- a text-based table with 🚩 emojis representing flags
+- a text-based table with ⚑ characters representing flags
 - colored square values representing cards (`0` is `10`)
 
 ```sh
 $ cargo run
 
+    2
+    1
+⚑   ⚑   ⚑   ⚑   ⚑   ⚑   ⚑
+                3       0
 
-
-
- [🚩]  [🚩]  [🚩]  [🚩]  [🚩]  [🚩]
-
-
-
-
-  1    3    5    7    9    0
 ```
