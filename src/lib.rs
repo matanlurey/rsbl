@@ -1,5 +1,73 @@
 //! Game logic and data structures.
 
+use std::{collections::VecDeque, slice::Iter};
+
+use rand::{seq::SliceRandom, Rng};
+
+#[derive(Debug)]
+pub struct Hand {
+    cards: Vec<Card>,
+}
+
+impl Hand {
+    pub fn new() -> Hand {
+        return Hand { cards: Vec::new() };
+    }
+
+    pub fn len(&self) -> usize {
+        return self.cards.len();
+    }
+
+    pub fn add(&mut self, card: &Card) {
+        self.cards.push(card.clone());
+    }
+
+    pub fn iter(&self) -> Iter<Card> {
+        return self.cards.iter();
+    }
+
+    pub fn remove(&mut self, index: usize) -> Card {
+        return self.cards.remove(index);
+    }
+}
+
+#[derive(Debug)]
+pub struct Deck {
+    cards: VecDeque<Card>,
+}
+
+impl Deck {
+    const COLORS: [TroopColor; 6] = [
+        TroopColor::Red,
+        TroopColor::Green,
+        TroopColor::Blue,
+        TroopColor::Yellow,
+        TroopColor::Orange,
+        TroopColor::Purple,
+    ];
+
+    pub fn of_troops(shuffle_with: &mut impl Rng) -> Deck {
+        let mut cards: Vec<Card> = Vec::with_capacity(Deck::COLORS.len() * 10);
+        for color in Deck::COLORS {
+            for value in 0..10 {
+                cards.push(Card::Troop(TroopValue::new(value + 1), color));
+            }
+        }
+        cards.shuffle(shuffle_with);
+        return Deck {
+            cards: VecDeque::from(cards),
+        };
+    }
+
+    pub fn draw(&mut self) -> Option<Card> {
+        return self.cards.pop_front();
+    }
+
+    pub fn len(&self) -> usize {
+        return self.cards.len();
+    }
+}
+
 /// The field of cards, i.e. seven flags with cards being played at each.
 pub struct Field {
     columns: Vec<Column>,
@@ -79,14 +147,14 @@ impl Formation {
 }
 
 /// Possible cards.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Card {
     Tactics,
     Troop(TroopValue, TroopColor),
 }
 
 /// Possible colors for a troop card.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TroopColor {
     Red,
     Green,
@@ -97,7 +165,7 @@ pub enum TroopColor {
 }
 
 /// Possible values for a troop card, i.e. between 1 and 10.
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct TroopValue {
     value: u8,
 }

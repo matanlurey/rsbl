@@ -1,7 +1,7 @@
 //! UI-specific submodule for Battle Line, i.e. with colors and I/O.
 
 use ansi_term::Color;
-use rsbl::{Card, Field, Flag, TroopColor};
+use rsbl::{Card, Field, Flag, Hand, TroopColor};
 use std::fmt::Display;
 
 use crate::display::{Buffer, Cell};
@@ -67,6 +67,21 @@ pub fn draw_field(field: Field) -> impl Display {
             buffer.set(c * 4, i, draw_card(card));
             i += 1;
         }
+    }
+
+    return buffer;
+}
+
+pub fn draw_hand(hand: Hand) -> impl Display {
+    let mut buffer = Buffer::new(10 * 3, 3);
+    let mut i = 0;
+
+    buffer.print(&String::from("Hand:"), 0, 0, None, None);
+
+    for card in hand.iter() {
+        buffer.print(&format!("{}", i + 1), i * 4, 1, None, None);
+        buffer.set(i * 4, 2, draw_card(card));
+        i += 1;
     }
 
     return buffer;

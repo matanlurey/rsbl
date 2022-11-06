@@ -20,6 +20,8 @@ use ansi_term::{Color, Style};
 /// and provides methods for querying and editing them programatically.
 pub struct Buffer {
     cells: Vec<Vec<Cell>>,
+    width: usize,
+    height: usize,
 }
 
 impl Buffer {
@@ -40,7 +42,48 @@ impl Buffer {
             rows.push(column);
         }
 
-        Buffer { cells: rows }
+        Buffer {
+            cells: rows,
+            width,
+            height,
+        }
+    }
+
+    /// Sets the characters representing `text` to a particular location.
+    pub fn print<'a>(
+        &mut self,
+        render: &'a String,
+        column: usize,
+        row: usize,
+        foreground: Option<Color>,
+        background: Option<Color>,
+    ) {
+        if render.is_empty() {
+            return;
+        }
+        let lines = &mut render.lines();
+        for i in 0..lines.count() {
+            let line = if lines.count() == 0 {
+                render
+            } else {
+                lines.next().expect("String was length checked")
+            };
+            for n in 0..line.chars().count() {
+                if column + n >= self.width || row + i >= self.height {
+                    continue;
+                }
+                let mut cell = Cell::new();
+                let char = line.chars().nth(n).unwrap();
+                cell.render(String::from(char));
+                if let Some(foreground) = foreground {
+                    cell.fg(foreground);
+                }
+                if let Some(background) = background {
+                    cell.bg(background);
+                }
+                self.set(column + n, row + i, cell);
+            }
+        }
     }
 
     /// Sets a reference to the cell at the provided `column` and `row`.

@@ -13,10 +13,18 @@ Currently there is only the simplest prototype of the game:
 
 ```sh
 $ cargo run
-
     2
     1
 ⚑   ⚑   ⚑   ⚑   ⚑   ⚑   ⚑
                 3       0
 
+
+
+
+Hand:
+1   2   3   4   5   6   7
+6   3   1   1   0   0   5
+
+
+53 cards remaining in the Troop Deck
 ```

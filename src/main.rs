@@ -1,5 +1,5 @@
-use rsbl::{Card, Field, Side, TroopColor, TroopValue};
-use ui::draw_field;
+use rand;
+use rsbl::{Card, Deck, Field, Hand, Side, TroopColor, TroopValue};
 
 mod display;
 pub mod lib;
@@ -32,5 +32,17 @@ fn main() {
         Card::Troop(TroopValue::new(10), TroopColor::Green),
     );
 
-    println!("{}", draw_field(field));
+    println!("{}", ui::draw_field(field));
+    println!();
+
+    let mut troops = Deck::of_troops(&mut rand::thread_rng());
+    let mut player = Hand::new();
+
+    for _ in 0..7 {
+        player.add(&troops.draw().unwrap());
+    }
+
+    println!("{}", ui::draw_hand(player));
+    println!();
+    println!("{} cards remaining in the Troop Deck", troops.len());
 }
